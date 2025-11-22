@@ -1,3 +1,4 @@
+
 export enum House {
   Gryffindor = 'Gryffindor',
   Slytherin = 'Slytherin',
@@ -20,6 +21,13 @@ export interface CharacterStats {
   loyalty: number;
 }
 
+export interface WandData {
+  wood: string;
+  core: string;
+  length: string;
+  flexibility: string;
+}
+
 export interface CardData {
   name: string;
   house: House;
@@ -30,9 +38,24 @@ export interface CardData {
   abilities: Ability[];
   flavorText: string;
   stats: CharacterStats;
-  wand?: string;
-  patronus?: string;
   
+  // Identity & Lore
+  wand: WandData;
+  patronus: string;
+  boggart: string;
+  bloodStatus: string; // e.g. Pure-blood, Half-blood
+  bestSubject: string; // e.g. Potions, Charms
+  titles: string[]; // e.g. Prefect, Head Boy, Auror
+  
+  // The Grand Update: Deep Lore
+  animagus: string | null; // "Tabby Cat (Square markings around eyes)" or null
+  familiar: string; // "Hedwig (Snowy Owl)"
+  mirrorOfErised: string; // "Seeing his parents alive and happy"
+  amortentia: string[]; // ["Treacle Tart", "Broomstick handle wood", "Ginny's hair"]
+  dangerLevel: number; // 1-10 Scale
+  affiliations: string[]; // ["Order of the Phoenix", "Dumbledore's Army"]
+  signatureSpell: string; // "Expelliarmus"
+
   // Expanded Profile Data
   biography: string;
   strengths: string[];

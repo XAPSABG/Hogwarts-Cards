@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { CardData, House } from '../types';
 
@@ -33,8 +34,9 @@ const characterSchema = {
         },
         required: ['name', 'cost', 'description']
       },
-      description: "Generate exactly 2 or 3 abilities. No more than 3."
+      description: "Generate exactly 2 abilities."
     },
+    signatureSpell: { type: Type.STRING, description: "The character's most famous or frequent spell. e.g. 'Expelliarmus' for Harry." },
     flavorText: { type: Type.STRING, description: "Short poetic flavor text, max 1 sentence." },
     stats: {
       type: Type.OBJECT,
@@ -47,8 +49,31 @@ const characterSchema = {
       },
       required: ['magic', 'courage', 'intelligence', 'cunning', 'loyalty']
     },
-    wand: { type: Type.STRING, description: "Wood, core, length, flexibility" },
-    patronus: { type: Type.STRING },
+    // New Deep Lore Fields
+    wand: {
+      type: Type.OBJECT,
+      properties: {
+        wood: { type: Type.STRING, description: "e.g. Holly, Yew, Vine" },
+        core: { type: Type.STRING, description: "e.g. Phoenix Feather, Dragon Heartstring" },
+        length: { type: Type.STRING, description: "e.g. 11 inches" },
+        flexibility: { type: Type.STRING, description: "e.g. Supple, Unyielding, Whippy" }
+      },
+      required: ['wood', 'core', 'length', 'flexibility']
+    },
+    patronus: { type: Type.STRING, description: "Corporeal patronus form, e.g. Stag, Otter. If Dark Wizard, put 'None' or 'Maggots'." },
+    boggart: { type: Type.STRING, description: "Greatest fear form." },
+    bloodStatus: { type: Type.STRING, enum: ['Pure-blood', 'Half-blood', 'Muggle-born', 'Squib', 'Half-breed', 'Unknown'] },
+    bestSubject: { type: Type.STRING, description: "Best Hogwarts subject, e.g. Potions, Charms, Transfiguration." },
+    titles: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Honorifics or roles, e.g. 'Prefect', 'Head Boy', 'Auror', 'Death Eater'. Max 3." },
+    
+    // Grand Update Fields
+    animagus: { type: Type.STRING, description: "Animal form if applicable, else null. Include distinctive markings. e.g. 'Black Dog', 'Beetle with glasses markings'."},
+    familiar: { type: Type.STRING, description: "Animal companion name and species. e.g. 'Hedwig (Snowy Owl)', 'Crookshanks (Kneazle)'."},
+    mirrorOfErised: { type: Type.STRING, description: "What they see in the Mirror of Erised (Deepest Desires)."},
+    amortentia: { type: Type.ARRAY, items: { type: Type.STRING }, description: "3 specific smells they love (Amortentia potion). e.g. 'Freshly mown grass', 'New parchment'."},
+    dangerLevel: { type: Type.INTEGER, description: "Ministry threat assessment level 1-10. 1 is harmless, 10 is Voldemort level threat."},
+    affiliations: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Organizations they belong to. e.g. 'Order of the Phoenix', 'Slug Club', 'Dumbledore's Army', 'Death Eaters'."},
+
     biography: { type: Type.STRING, description: "A 3-4 sentence backstory or biography." },
     strengths: { 
       type: Type.ARRAY, 
@@ -70,23 +95,24 @@ const characterSchema = {
       description: "A comprehensive art prompt. If the character is a known canon figure (e.g. Harry Potter, Snape, Hermione), you MUST describe their specific physical traits (face, hair, scars) exactly as they appear in the movies/books to ensure a recognizable likeness. Describe attire, dynamic pose, and detailed environment/lighting. Style: Fantasy oil painting." 
     }
   },
-  required: ['name', 'house', 'type', 'hp', 'rarity', 'abilities', 'flavorText', 'stats', 'visualDescription', 'biography', 'strengths', 'weaknesses', 'equipment']
+  required: ['name', 'house', 'type', 'hp', 'rarity', 'abilities', 'signatureSpell', 'flavorText', 'stats', 'visualDescription', 'biography', 'strengths', 'weaknesses', 'equipment', 'wand', 'patronus', 'boggart', 'bloodStatus', 'bestSubject', 'titles', 'familiar', 'mirrorOfErised', 'amortentia', 'dangerLevel', 'affiliations']
 };
 
 export const generateCharacterData = async (prompt: string): Promise<CardData> => {
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
-      contents: `Create a detailed trading card profile for a Harry Potter universe character based on: "${prompt}". 
+      contents: `Create a detailed Ministry of Magic Personnel File for a Harry Potter universe character based on: "${prompt}". 
       
       Rules:
-      1. If the input matches a canon character (e.g. "Harry Potter"), you MUST use accurate lore and the 'visualDescription' MUST explicitly describe their iconic physical appearance (actor likeness if applicable) to ensure the image generator creates a recognizable portrait.
+      1. If the input matches a canon character (e.g. "Harry Potter"), you MUST use accurate lore.
       2. If the input is generic (e.g., "Auror"), create a unique character.
-      3. Ensure ability costs use TCG style notation (R/S/B/H/D/W).
-      4. The output must be valid JSON matching the schema.
-      5. Make the biography sound like an official Ministry of Magic record.
+      3. BE CREATIVE with the 'Psychological Profile' (Amortentia/Mirror of Erised).
+      4. 'dangerLevel' should be accurate. Students are usually 1-3. Aurors 4-6. Dark Wizards 7-10.
+      5. The output must be valid JSON matching the schema.
       6. For 'visualDescription', you MUST include detailed environment, lighting, and pose instructions.
-      7. IMPORTANT: Generate MAXIMUM 3 abilities. Keep ability descriptions VERY concise (under 20 words).`,
+      7. IMPORTANT: Generate exactly 2 standard abilities + 1 Signature Spell.
+      8. Amortentia smells should be evocative and specific to the character's loves.`,
       config: {
         responseMimeType: "application/json",
         responseSchema: characterSchema,
