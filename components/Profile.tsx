@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
+import { toPng } from 'html-to-image';
 import { CardData, House } from '../types';
 import { StatBar } from './StatBar';
-import { Wand2, Shield, Fingerprint, Skull, Briefcase, ScrollText, Stamp, Star, Flame, Paperclip } from 'lucide-react';
+import { Wand2, Fingerprint, Skull, Briefcase, ScrollText, Stamp, Star, Flame, Paperclip, Download, Loader2 } from 'lucide-react';
 
 interface ProfileProps {
   data: CardData;
@@ -36,13 +37,78 @@ const HouseCrest: Record<House, string> = {
 export const Profile: React.FC<ProfileProps> = ({ data, imageUrl, isLoadingImage }) => {
   const houseColor = HouseColorMap[data.house];
   const houseBorder = HouseBorderMap[data.house];
+  
+  const ref = useRef<HTMLDivElement>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [fontCss, setFontCss] = useState<string>('');
+
+  // Pre-fetch the Google Fonts CSS to inline it.
+  // This avoids the "Cannot access rules" error from html-to-image trying to read the external stylesheet.
+  useEffect(() => {
+    const fetchFonts = async () => {
+      try {
+        const response = await fetch('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap', {
+          mode: 'cors'
+        });
+        const css = await response.text();
+        setFontCss(css);
+      } catch (e) {
+        console.error("Failed to fetch fonts for archive", e);
+      }
+    };
+    fetchFonts();
+  }, []);
+
+  const handleSave = async () => {
+    if (ref.current === null) return;
+    
+    setIsSaving(true);
+    try {
+      const dataUrl = await toPng(ref.current, { 
+        cacheBust: true,
+        backgroundColor: '#0a0a0a',
+        // Filter out LINK tags to prevent html-to-image from trying to read cross-origin stylesheets
+        filter: (node) => {
+          return node.tagName !== 'LINK';
+        },
+        style: {
+            transform: 'none',
+            margin: '0'
+        }
+      });
+      
+      const link = document.createElement('a');
+      link.download = `${data.name.replace(/\s+/g, '_')}_Ministry_Record.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error('Failed to save image', err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
-    <div className="relative w-full max-w-4xl perspective-1000">
+    <div className="w-full max-w-4xl flex flex-col gap-6">
       
+      {/* Action Bar */}
+      <div className="flex justify-end">
+        <button 
+            onClick={handleSave}
+            disabled={isSaving || isLoadingImage}
+            className="flex items-center gap-2 bg-[#1a1a1a] hover:bg-[#252525] disabled:opacity-50 disabled:cursor-not-allowed text-amber-500 px-5 py-2.5 rounded-md border border-amber-900/30 transition-all shadow-xl font-serif uppercase tracking-wider text-xs font-bold group"
+        >
+            {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} className="group-hover:-translate-y-0.5 transition-transform" />}
+            <span>{isSaving ? 'Archiving...' : 'Archive Record'}</span>
+        </button>
+      </div>
+
       {/* Main Folder Container */}
-      <div className="bg-[#f0e6d2] texture-paper text-neutral-800 rounded-sm shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] p-8 md:p-12 border border-[#d4c5a3] relative overflow-hidden min-h-[800px]">
+      <div ref={ref} className="bg-[#f0e6d2] texture-paper text-neutral-800 rounded-sm shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] p-8 md:p-12 border border-[#d4c5a3] relative overflow-hidden min-h-[800px] mx-auto w-full">
         
+        {/* Inlined Font Styles for Image Capture */}
+        <style>{fontCss}</style>
+
         {/* Background Watermark */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[20rem] opacity-[0.02] pointer-events-none select-none filter grayscale rotate-12">
             {HouseCrest[data.house]}
@@ -101,7 +167,12 @@ export const Profile: React.FC<ProfileProps> = ({ data, imageUrl, isLoadingImage
                                 </div>
                             ) : imageUrl ? (
                                 <>
-                                <img src={imageUrl} alt={data.name} className="w-full h-full object-cover" />
+                                <img 
+                                    src={imageUrl} 
+                                    alt={data.name} 
+                                    className="w-full h-full object-cover"
+                                    crossOrigin="anonymous"
+                                />
                                 <div className="absolute inset-0 pointer-events-none mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/dust.png')] opacity-50"></div>
                                 </>
                             ) : (
