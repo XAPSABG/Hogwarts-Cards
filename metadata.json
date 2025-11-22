@@ -1,0 +1,5 @@
+{
+  "name": "Hogwarts TCG Maker",
+  "description": "Generate comprehensive Harry Potter style trading cards and profiles using Gemini AI. Enter a character name or description to create stats, abilities, lore, and custom artwork.",
+  "requestFramePermissions": []
+}
