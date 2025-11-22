@@ -106,9 +106,18 @@ export const generateCharacterImage = async (visualPrompt: string): Promise<stri
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
-      contents: `High fantasy oil painting in the style of Magic The Gathering art. Detailed masterpiece, 8k resolution, dramatic cinematic lighting. ${visualPrompt}
-      
-      IMPORTANT: Generate the artwork ONLY. Do NOT include any card frames, borders, text, stats, or UI elements. The image should be a full-bleed character illustration.`,
+      contents: {
+        parts: [{
+          text: `High fantasy oil painting in the style of Magic The Gathering art. Detailed masterpiece, 8k resolution, dramatic cinematic lighting. Subject centered in frame. ${visualPrompt}
+          
+          IMPORTANT: Generate the artwork ONLY. Do NOT include any card frames, borders, text, stats, or UI elements. The image should be a full-bleed character illustration.`
+        }]
+      },
+      config: {
+        imageConfig: {
+          aspectRatio: "4:3" // Landscape ratio to fit card art box
+        }
+      }
     });
 
     for (const part of response.candidates[0].content.parts) {
@@ -119,6 +128,6 @@ export const generateCharacterImage = async (visualPrompt: string): Promise<stri
     throw new Error("No image data generated.");
   } catch (error) {
     console.error("Error generating image:", error);
-    return `https://picsum.photos/400/500?grayscale&blur=2`;
+    return `https://picsum.photos/400/300?grayscale&blur=2`;
   }
 };

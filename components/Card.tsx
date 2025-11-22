@@ -101,10 +101,10 @@ export const Card: React.FC<CardProps> = ({ data, imageUrl, isLoadingImage }) =>
   return (
     <div className="group perspective-1000 select-none">
       <div className={`
-        relative w-[380px] h-[540px] rounded-[20px] p-3
+        relative w-[320px] h-[480px] sm:w-[360px] sm:h-[540px] rounded-[18px] p-2.5
         bg-gradient-to-br ${style.bgGradient}
-        shadow-[0_20px_50px_-12px_rgba(0,0,0,0.7)]
-        border-[8px] ${style.border}
+        shadow-[0_15px_40px_-10px_rgba(0,0,0,0.7)]
+        border-[6px] sm:border-[8px] ${style.border}
         transition-transform duration-300 group-hover:scale-[1.02] group-hover:-rotate-1
       `}>
         
@@ -112,18 +112,18 @@ export const Card: React.FC<CardProps> = ({ data, imageUrl, isLoadingImage }) =>
         <div className="relative w-full h-full flex flex-col bg-black/20 rounded-lg overflow-hidden border border-white/10">
           
           {/* Header */}
-          <div className={`h-9 ${style.headerColor} border-b border-black/30 flex items-center justify-between px-3 shadow-md z-10 relative`}>
-            <h2 className={`font-display font-bold text-base ${style.textColor} tracking-wide shadow-black drop-shadow-md`}>
+          <div className={`h-8 sm:h-9 ${style.headerColor} border-b border-black/30 flex items-center justify-between px-3 shadow-md z-10 relative`}>
+            <h2 className={`font-display font-bold text-sm sm:text-base ${style.textColor} tracking-wide shadow-black drop-shadow-md`}>
               {data.name}
             </h2>
-            {/* Mana Cost / Power Level approximation using Magic Stat */}
+            {/* Rarity Sparkle */}
             <div className="flex items-center gap-1">
-               {data.rarity === 'Mythic' && <Sparkles className="w-4 h-4 text-amber-300 animate-pulse filter drop-shadow-lg" />}
+               {data.rarity === 'Mythic' && <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-amber-300 animate-pulse filter drop-shadow-lg" />}
             </div>
           </div>
 
           {/* Image Area */}
-          <div className="relative w-full h-[250px] bg-[#0a0a0a] border-y-[2px] border-[#2a2a2a] shadow-inner group overflow-hidden">
+          <div className="relative w-full h-[210px] sm:h-[250px] bg-[#0a0a0a] border-y-[2px] border-[#2a2a2a] shadow-inner group overflow-hidden">
              {isLoadingImage ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-neutral-900 text-neutral-500 gap-2">
                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
@@ -131,7 +131,12 @@ export const Card: React.FC<CardProps> = ({ data, imageUrl, isLoadingImage }) =>
               </div>
             ) : imageUrl ? (
               <>
-                <img src={imageUrl} alt={data.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                {/* Object-top ensures faces aren't cut off if ratio is slightly off */}
+                <img 
+                  src={imageUrl} 
+                  alt={data.name} 
+                  className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105" 
+                />
                 {/* Texture overlay on image for canvas feel */}
                 <div className="absolute inset-0 opacity-20 pointer-events-none mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/canvas.png')]"></div>
               </>
@@ -142,7 +147,7 @@ export const Card: React.FC<CardProps> = ({ data, imageUrl, isLoadingImage }) =>
             {/* Rarity Symbol */}
             <div className={`
               absolute right-2 bottom-2 px-2 py-0.5 rounded-full 
-              flex items-center justify-center text-[9px] uppercase font-bold tracking-widest
+              flex items-center justify-center text-[8px] sm:text-[9px] uppercase font-bold tracking-widest
               border backdrop-blur-md shadow-lg
               ${data.rarity === 'Mythic' ? 'bg-orange-600/90 text-white border-orange-400' : 
                 data.rarity === 'Rare' ? 'bg-yellow-500/90 text-black border-yellow-300' : 
@@ -154,33 +159,33 @@ export const Card: React.FC<CardProps> = ({ data, imageUrl, isLoadingImage }) =>
           </div>
 
           {/* Type Line */}
-          <div className={`h-7 bg-neutral-200/95 border-b border-black/20 flex items-center px-3 z-10 relative shadow-sm`}>
-            <span className="text-xs font-bold text-black font-display uppercase tracking-wider truncate max-w-[200px]">
+          <div className={`h-6 sm:h-7 bg-neutral-200/95 border-b border-black/20 flex items-center px-3 z-10 relative shadow-sm`}>
+            <span className="text-[10px] sm:text-xs font-bold text-black font-display uppercase tracking-wider truncate max-w-[200px]">
               {data.type} {data.subType ? `— ${data.subType}` : ''}
             </span>
             <div className="ml-auto">
-               <span className={`text-[10px] font-bold text-neutral-600 opacity-70`}>
+               <span className={`text-[9px] sm:text-[10px] font-bold text-neutral-600 opacity-70`}>
                   Set: {data.house.substring(0,3).toUpperCase()}
                </span>
             </div>
           </div>
 
           {/* Text Box */}
-          <div className="flex-grow bg-[#e8e4da] relative overflow-hidden p-3 texture-paper">
+          <div className="flex-grow bg-[#e8e4da] relative overflow-hidden p-2 sm:p-3 texture-paper">
              {/* Watermark Icon */}
              <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
                 <div className="w-24 h-24 bg-current rounded-full"></div> 
              </div>
 
              {/* Abilities */}
-             <div className="space-y-3 mb-2 min-h-[100px] relative z-10">
+             <div className="space-y-2 sm:space-y-3 mb-2 relative z-10">
                 {data.abilities.map((ability, idx) => (
                   <div key={idx} className="text-sm text-neutral-900 leading-snug">
-                    <div className="flex items-center gap-2 mb-0.5">
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5">
                       <CostBadge cost={ability.cost} />
-                      <span className="font-bold font-serif text-neutral-900">{ability.name}</span>
+                      <span className="font-bold font-serif text-xs sm:text-sm text-neutral-900">{ability.name}</span>
                     </div>
-                    <p className="text-[11px] text-neutral-800 font-serif pl-1 border-l-2 border-neutral-400/50 ml-0.5">
+                    <p className="text-[10px] sm:text-[11px] text-neutral-800 font-serif pl-1 border-l-2 border-neutral-400/50 ml-0.5 leading-tight">
                       {ability.description}
                     </p>
                   </div>
@@ -188,30 +193,30 @@ export const Card: React.FC<CardProps> = ({ data, imageUrl, isLoadingImage }) =>
              </div>
 
              {/* Flavor Text */}
-             <div className="mt-auto pt-2 border-t border-neutral-500/30 relative z-10">
-               <p className="text-[10px] italic text-neutral-700 font-serif text-center leading-snug px-2">
+             <div className="absolute bottom-2 left-2 right-2 pt-2 border-t border-neutral-500/30 relative z-10">
+               <p className="text-[9px] sm:text-[10px] italic text-neutral-700 font-serif text-center leading-snug px-1 line-clamp-2">
                  "{data.flavorText}"
                </p>
              </div>
           </div>
 
           {/* Footer / Stats */}
-          <div className={`h-8 ${style.headerColor} flex items-center justify-between px-3 border-t border-white/10 relative z-10`}>
+          <div className={`h-7 sm:h-8 ${style.headerColor} flex items-center justify-between px-3 border-t border-white/10 relative z-10`}>
               <div className="text-[9px] text-white/50 font-mono flex flex-col leading-none">
                 <span>{data.house.toUpperCase()}</span> 
                 <span>No. {Math.floor(Math.random() * 300)}/300</span>
               </div>
               
               {/* Power / Toughness Box */}
-              <div className="flex bg-neutral-900 border-2 border-neutral-600 rounded-lg px-3 py-1 -mt-6 shadow-xl z-20 items-center gap-3 transform translate-y-1">
+              <div className="flex bg-neutral-900 border-2 border-neutral-600 rounded-lg px-2 sm:px-3 py-0.5 sm:py-1 -mt-5 sm:-mt-6 shadow-xl z-20 items-center gap-2 sm:gap-3 transform translate-y-0.5">
                  <div className="flex items-center gap-1 text-yellow-500">
-                    <Swords size={14} />
-                    <span className="font-bold text-white text-base font-display">{Math.floor(data.stats.magic / 10)}</span>
+                    <Swords size={12} className="sm:w-3.5 sm:h-3.5" />
+                    <span className="font-bold text-white text-sm sm:text-base font-display">{Math.floor(data.stats.magic / 10)}</span>
                  </div>
-                 <div className="w-px h-4 bg-white/20"></div>
+                 <div className="w-px h-3 sm:h-4 bg-white/20"></div>
                  <div className="flex items-center gap-1 text-blue-400">
-                    <Shield size={14} />
-                    <span className="font-bold text-white text-base font-display">{data.hp}</span>
+                    <Shield size={12} className="sm:w-3.5 sm:h-3.5" />
+                    <span className="font-bold text-white text-sm sm:text-base font-display">{data.hp}</span>
                  </div>
               </div>
           </div>
@@ -219,8 +224,8 @@ export const Card: React.FC<CardProps> = ({ data, imageUrl, isLoadingImage }) =>
         </div>
 
         {/* Holographic Overlay */}
-        <div className="absolute inset-0 rounded-[14px] foil-overlay pointer-events-none z-50 opacity-25 mix-blend-color-dodge"></div>
-        <div className="absolute inset-0 rounded-[14px] bg-gradient-to-tr from-transparent via-white/5 to-transparent pointer-events-none z-40"></div>
+        <div className="absolute inset-0 rounded-[12px] foil-overlay pointer-events-none z-50 opacity-25 mix-blend-color-dodge"></div>
+        <div className="absolute inset-0 rounded-[12px] bg-gradient-to-tr from-transparent via-white/5 to-transparent pointer-events-none z-40"></div>
       </div>
     </div>
   );
