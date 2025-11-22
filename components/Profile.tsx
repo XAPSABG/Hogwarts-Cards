@@ -2,7 +2,11 @@ import React, { useRef, useState, useEffect } from 'react';
 import { toPng } from 'html-to-image';
 import { CardData, House } from '../types';
 import { StatBar } from './StatBar';
-import { Wand2, Fingerprint, Skull, Briefcase, ScrollText, Stamp, Star, Flame, Paperclip, Download, Loader2 } from 'lucide-react';
+import { 
+  Wand2, Fingerprint, Skull, Briefcase, ScrollText, Stamp, Star, 
+  Flame, Paperclip, Download, Loader2, Zap, Snowflake, Heart, 
+  Shield, Brain, FlaskConical, Wind, Leaf, Sparkles 
+} from 'lucide-react';
 
 interface ProfileProps {
   data: CardData;
@@ -34,6 +38,43 @@ const HouseCrest: Record<House, string> = {
     [House.Neutral]: "⚖️"
 };
 
+// Helper to determine icon based on ability keywords
+const getAbilityIcon = (name: string, desc: string) => {
+  const text = (name + " " + desc).toLowerCase();
+  
+  if (text.includes('fire') || text.includes('burn') || text.includes('incendio') || text.includes('flame')) 
+    return <Flame className="w-5 h-5 text-orange-600" />;
+  
+  if (text.includes('ice') || text.includes('freeze') || text.includes('cold') || text.includes('glacius')) 
+    return <Snowflake className="w-5 h-5 text-cyan-600" />;
+  
+  if (text.includes('lightning') || text.includes('shock') || text.includes('stun') || text.includes('thunder')) 
+    return <Zap className="w-5 h-5 text-yellow-600" />;
+  
+  if (text.includes('heal') || text.includes('repair') || text.includes('life') || text.includes('episkey')) 
+    return <Heart className="w-5 h-5 text-red-600" />;
+  
+  if (text.includes('shield') || text.includes('protect') || text.includes('defend') || text.includes('block')) 
+    return <Shield className="w-5 h-5 text-blue-600" />;
+  
+  if (text.includes('dark') || text.includes('curse') || text.includes('death') || text.includes('avada')) 
+    return <Skull className="w-5 h-5 text-purple-900" />;
+  
+  if (text.includes('mind') || text.includes('memory') || text.includes('thought') || text.includes('obliviate')) 
+    return <Brain className="w-5 h-5 text-pink-600" />;
+  
+  if (text.includes('poison') || text.includes('potion') || text.includes('acid') || text.includes('venom')) 
+    return <FlaskConical className="w-5 h-5 text-green-600" />;
+  
+  if (text.includes('wind') || text.includes('fly') || text.includes('levitate') || text.includes('air')) 
+    return <Wind className="w-5 h-5 text-slate-500" />;
+  
+  if (text.includes('plant') || text.includes('root') || text.includes('nature') || text.includes('earth')) 
+    return <Leaf className="w-5 h-5 text-green-700" />;
+  
+  return <Sparkles className="w-5 h-5 text-amber-600" />;
+};
+
 export const Profile: React.FC<ProfileProps> = ({ data, imageUrl, isLoadingImage }) => {
   const houseColor = HouseColorMap[data.house];
   const houseBorder = HouseBorderMap[data.house];
@@ -43,7 +84,6 @@ export const Profile: React.FC<ProfileProps> = ({ data, imageUrl, isLoadingImage
   const [fontCss, setFontCss] = useState<string>('');
 
   // Pre-fetch the Google Fonts CSS to inline it.
-  // This avoids the "Cannot access rules" error from html-to-image trying to read the external stylesheet.
   useEffect(() => {
     const fetchFonts = async () => {
       try {
@@ -66,8 +106,7 @@ export const Profile: React.FC<ProfileProps> = ({ data, imageUrl, isLoadingImage
     try {
       const dataUrl = await toPng(ref.current, { 
         cacheBust: true,
-        backgroundColor: '#0a0a0a',
-        // Filter out LINK tags to prevent html-to-image from trying to read cross-origin stylesheets
+        backgroundColor: '#f0e6d2',
         filter: (node) => {
           return node.tagName !== 'LINK';
         },
@@ -139,6 +178,19 @@ export const Profile: React.FC<ProfileProps> = ({ data, imageUrl, isLoadingImage
                         <span className="w-1 h-1 bg-neutral-400 rounded-full"></span>
                         <span className="text-neutral-600 font-serif italic text-lg">{data.type} {data.subType && `(${data.subType})`}</span>
                     </div>
+                    {/* Titles & Blood Status */}
+                    <div className="flex flex-wrap gap-2 mt-3">
+                       {data.bloodStatus && (
+                           <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 border border-neutral-400 text-neutral-500 rounded-full">
+                             {data.bloodStatus}
+                           </span>
+                       )}
+                       {data.titles?.map((title, i) => (
+                           <span key={i} className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-neutral-200 text-neutral-600 rounded-full">
+                             {title}
+                           </span>
+                       ))}
+                    </div>
                 </div>
                 
                 <div className="flex flex-col items-end">
@@ -204,33 +256,81 @@ export const Profile: React.FC<ProfileProps> = ({ data, imageUrl, isLoadingImage
                      </div>
                 </div>
 
-                 {/* Equipment */}
-                 <section>
-                    <h4 className={`font-display font-bold text-neutral-800 mb-3 flex items-center gap-2 text-sm uppercase tracking-wider`}>
-                        <Briefcase size={14} /> Equipment & Artifacts
+                 {/* Lore Details (Wand, Patronus, etc) */}
+                 <section className="bg-[#e6dec8] border border-[#d1c7b0] p-4 shadow-inner rounded-sm space-y-4">
+                    <h4 className={`font-display font-bold text-neutral-800 text-sm uppercase tracking-wider flex items-center gap-2 border-b border-neutral-900/10 pb-2`}>
+                        <Briefcase size={14} /> Personnel Details
                     </h4>
-                    <ul className="bg-[#e6dec8] border border-[#d1c7b0] p-4 space-y-3 text-sm font-serif shadow-inner rounded-sm">
-                        {data.wand && (
-                             <li className="flex items-start gap-2 pb-2 border-b border-neutral-900/5">
-                                <Wand2 className="w-4 h-4 text-neutral-600 mt-0.5 flex-shrink-0" />
-                                <div>
-                                    <span className="font-bold text-neutral-800 text-xs uppercase block opacity-70">Wand</span>
-                                    <span className="text-neutral-900 italic">{data.wand}</span>
-                                </div>
-                             </li>
-                        )}
-                        {data.equipment && data.equipment.length > 0 ? (
-                            data.equipment.map((item, i) => (
-                                <li key={i} className="flex items-start gap-2">
-                                    <ScrollText className="w-4 h-4 text-neutral-600 mt-0.5 flex-shrink-0" />
-                                    <span className="text-neutral-800">{item}</span>
-                                </li>
-                            ))
-                        ) : (
-                            <li className="text-neutral-400 italic text-xs">No notable equipment logged.</li>
-                        )}
-                    </ul>
+                    
+                    {/* Wand */}
+                    {data.wand && (
+                         <div className="flex items-start gap-3">
+                            <div className="p-1.5 bg-neutral-800/5 rounded-full">
+                                <Wand2 className="w-4 h-4 text-neutral-700" />
+                            </div>
+                            <div>
+                                <span className="text-[10px] font-bold uppercase text-neutral-500 block tracking-wide">Wand</span>
+                                <span className="text-neutral-900 font-serif text-sm italic leading-tight block">{data.wand}</span>
+                            </div>
+                         </div>
+                    )}
+
+                    {/* Patronus */}
+                    {data.patronus && (
+                         <div className="flex items-start gap-3">
+                            <div className="p-1.5 bg-blue-900/5 rounded-full">
+                                <Sparkles className="w-4 h-4 text-blue-700" />
+                            </div>
+                            <div>
+                                <span className="text-[10px] font-bold uppercase text-neutral-500 block tracking-wide">Patronus</span>
+                                <span className="text-neutral-900 font-serif text-sm leading-tight block">{data.patronus}</span>
+                            </div>
+                         </div>
+                    )}
+
+                    {/* Boggart */}
+                    {data.boggart && (
+                         <div className="flex items-start gap-3">
+                            <div className="p-1.5 bg-red-900/5 rounded-full">
+                                <Skull className="w-4 h-4 text-red-800" />
+                            </div>
+                            <div>
+                                <span className="text-[10px] font-bold uppercase text-neutral-500 block tracking-wide">Boggart Form</span>
+                                <span className="text-neutral-900 font-serif text-sm leading-tight block">{data.boggart}</span>
+                            </div>
+                         </div>
+                    )}
+
+                    {/* Best Subject */}
+                    {data.bestSubject && (
+                         <div className="flex items-start gap-3">
+                            <div className="p-1.5 bg-amber-900/5 rounded-full">
+                                <ScrollText className="w-4 h-4 text-amber-800" />
+                            </div>
+                            <div>
+                                <span className="text-[10px] font-bold uppercase text-neutral-500 block tracking-wide">Academic Specialty</span>
+                                <span className="text-neutral-900 font-serif text-sm leading-tight block">{data.bestSubject}</span>
+                            </div>
+                         </div>
+                    )}
                 </section>
+
+                 {/* Equipment */}
+                 {data.equipment && data.equipment.length > 0 && (
+                    <section>
+                        <h4 className={`font-display font-bold text-neutral-600 text-xs uppercase tracking-wider mb-2 pl-1`}>
+                            Known Possessions
+                        </h4>
+                        <ul className="space-y-1.5 text-sm font-serif pl-1">
+                            {data.equipment.map((item, i) => (
+                                <li key={i} className="flex items-start gap-2 text-neutral-800">
+                                    <span className="text-neutral-400 mt-1.5 w-1 h-1 bg-neutral-400 rounded-full"></span>
+                                    {item}
+                                </li>
+                            ))}
+                        </ul>
+                    </section>
+                 )}
 
             </div>
 
@@ -276,12 +376,16 @@ export const Profile: React.FC<ProfileProps> = ({ data, imageUrl, isLoadingImage
                         {data.abilities.map((ability, idx) => (
                             <div key={idx} className="bg-white/30 border border-neutral-900/5 p-3 rounded hover:bg-white/50 transition-colors">
                                 <div className="flex justify-between items-start mb-1">
-                                    <h5 className="font-bold text-neutral-900 font-serif text-lg">{ability.name}</h5>
+                                    <div className="flex items-center gap-2">
+                                        {/* Dynamic Ability Icon */}
+                                        {getAbilityIcon(ability.name, ability.description)}
+                                        <h5 className="font-bold text-neutral-900 font-serif text-lg">{ability.name}</h5>
+                                    </div>
                                     <span className="text-[10px] font-mono border border-neutral-300 rounded px-1.5 py-0.5 text-neutral-500 uppercase bg-neutral-50">
                                         Cost: {ability.cost}
                                     </span>
                                 </div>
-                                <p className="text-sm text-neutral-700 leading-snug font-serif">
+                                <p className="text-sm text-neutral-700 leading-snug font-serif pl-7">
                                     {ability.description}
                                 </p>
                             </div>
