@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { CardData } from './types';
 import { generateCharacterData, generateCharacterImage } from './services/geminiService';
 import { InputForm } from './components/InputForm';
-import { Card } from './components/Card';
 import { Profile } from './components/Profile';
 import { Sparkles } from 'lucide-react';
 
@@ -64,7 +63,7 @@ const App: React.FC = () => {
           Hogwarts Archives
         </h1>
         <p className="text-neutral-400 max-w-md mx-auto font-serif">
-          Conjure a magical profile and trading card for any witch, wizard, or beast.
+          Access the Ministry of Magic's personnel files.
         </p>
       </div>
 
@@ -80,34 +79,20 @@ const App: React.FC = () => {
 
       {/* Content Area */}
       {(isLoadingData || cardData) && (
-        <div className="w-full max-w-5xl flex flex-col lg:flex-row gap-12 items-start justify-center animate-in fade-in duration-700 slide-in-from-bottom-8">
-          
-          {/* Left Column: Card */}
-          <div className="flex-shrink-0 mx-auto lg:mx-0 perspective-1000">
-             {cardData ? (
-               <Card 
-                 data={cardData} 
-                 imageUrl={imageUrl} 
-                 isLoadingImage={isLoadingImage} 
-               />
-             ) : (
-               // Skeleton Card while loading data
-               <div className="w-[360px] h-[520px] bg-neutral-900 rounded-xl border border-neutral-800 animate-pulse flex items-center justify-center">
-                 <span className="text-neutral-600 font-serif italic">Consulting the sorting hat...</span>
-               </div>
-             )}
-          </div>
-
-          {/* Right Column: Profile Details */}
-          <div className="flex-grow w-full flex justify-center lg:justify-start">
+        <div className="w-full flex justify-center animate-in fade-in duration-700 slide-in-from-bottom-8 px-4 pb-20">
             {cardData ? (
-              <Profile data={cardData} />
+              <Profile 
+                data={cardData} 
+                imageUrl={imageUrl}
+                isLoadingImage={isLoadingImage}
+              />
             ) : (
               // Skeleton Profile
-              <div className="w-full max-w-md h-96 bg-neutral-900/50 rounded-xl border border-neutral-800/50 animate-pulse" />
+              <div className="w-full max-w-3xl h-96 bg-neutral-900/50 rounded-xl border border-neutral-800/50 animate-pulse flex flex-col items-center justify-center gap-4">
+                  <div className="w-16 h-16 border-4 border-amber-500/30 border-t-amber-500 rounded-full animate-spin"></div>
+                  <span className="text-amber-700 font-serif italic">Retrieving files from the Department of Mysteries...</span>
+              </div>
             )}
-          </div>
-          
         </div>
       )}
     </div>

@@ -1,19 +1,29 @@
 import React from 'react';
 import { CardData, House } from '../types';
 import { StatBar } from './StatBar';
-import { Wand2, Shield, Fingerprint, Skull, Briefcase, ScrollText, Stamp } from 'lucide-react';
+import { Wand2, Shield, Fingerprint, Skull, Briefcase, ScrollText, Stamp, Star, Flame, Paperclip } from 'lucide-react';
 
 interface ProfileProps {
   data: CardData;
+  imageUrl: string | null;
+  isLoadingImage: boolean;
 }
 
 const HouseColorMap: Record<House, string> = {
-  [House.Gryffindor]: 'bg-red-700',
-  [House.Slytherin]: 'bg-green-700',
-  [House.Ravenclaw]: 'bg-blue-700',
-  [House.Hufflepuff]: 'bg-yellow-600',
-  [House.Neutral]: 'bg-neutral-600',
+  [House.Gryffindor]: 'text-red-700',
+  [House.Slytherin]: 'text-green-800',
+  [House.Ravenclaw]: 'text-blue-800',
+  [House.Hufflepuff]: 'text-yellow-700',
+  [House.Neutral]: 'text-neutral-600',
 };
+
+const HouseBorderMap: Record<House, string> = {
+    [House.Gryffindor]: 'border-red-900/30',
+    [House.Slytherin]: 'border-green-900/30',
+    [House.Ravenclaw]: 'border-blue-900/30',
+    [House.Hufflepuff]: 'border-yellow-900/30',
+    [House.Neutral]: 'border-neutral-500/30',
+  };
 
 const HouseCrest: Record<House, string> = {
     [House.Gryffindor]: "🦁",
@@ -23,72 +33,119 @@ const HouseCrest: Record<House, string> = {
     [House.Neutral]: "⚖️"
 };
 
-export const Profile: React.FC<ProfileProps> = ({ data }) => {
-  const barColor = HouseColorMap[data.house];
+export const Profile: React.FC<ProfileProps> = ({ data, imageUrl, isLoadingImage }) => {
+  const houseColor = HouseColorMap[data.house];
+  const houseBorder = HouseBorderMap[data.house];
 
   return (
-    <div className="relative w-full max-w-2xl perspective-1000 animate-in fade-in slide-in-from-right-8 duration-700">
-      {/* Folder Tab */}
-      <div className="absolute -top-8 left-0 w-48 h-10 bg-[#d4c5a3] rounded-t-lg border-t border-l border-r border-[#b0a080] shadow-inner flex items-center px-4">
-        <span className="font-mono text-xs text-neutral-700 font-bold uppercase tracking-widest">Confidential // {new Date().getFullYear()}</span>
-      </div>
-
-      {/* Main File Container */}
-      <div className="bg-[#f0e6d2] texture-paper text-neutral-800 rounded-tr-lg rounded-b-lg shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)] p-8 border border-[#d4c5a3] relative overflow-hidden">
+    <div className="relative w-full max-w-4xl perspective-1000">
+      
+      {/* Main Folder Container */}
+      <div className="bg-[#f0e6d2] texture-paper text-neutral-800 rounded-sm shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] p-8 md:p-12 border border-[#d4c5a3] relative overflow-hidden min-h-[800px]">
         
-        {/* Watermark */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-9xl opacity-[0.03] pointer-events-none select-none filter grayscale rotate-12 scale-150">
+        {/* Background Watermark */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[20rem] opacity-[0.02] pointer-events-none select-none filter grayscale rotate-12">
             {HouseCrest[data.house]}
         </div>
 
-        {/* Stamps */}
-        <div className="absolute top-8 right-8 border-4 border-red-800/40 text-red-900/40 rounded p-2 transform rotate-12 font-display font-bold text-xl uppercase tracking-widest select-none pointer-events-none mix-blend-multiply">
-            Ministry Approved
+        {/* Top Stamps */}
+        <div className="absolute top-6 right-8 flex flex-col items-end gap-2 opacity-80">
+            <div className="border-2 border-red-800/50 text-red-900/60 px-3 py-1 transform -rotate-6 font-display font-bold text-sm uppercase tracking-widest select-none mix-blend-multiply">
+                CONFIDENTIAL
+            </div>
+            <div className="border-2 border-neutral-800/30 text-neutral-900/40 rounded-full w-20 h-20 flex items-center justify-center transform rotate-12 font-mono text-[10px] text-center leading-tight uppercase select-none mix-blend-multiply">
+                Ministry of Magic<br/>Records
+            </div>
         </div>
 
-        {/* Header */}
-        <div className="border-b-2 border-neutral-800/10 pb-6 mb-6 flex justify-between items-end relative z-10">
-            <div>
-                <h6 className="text-xs font-mono text-neutral-500 uppercase mb-1">Subject Profile</h6>
-                <h1 className="text-4xl font-display font-bold text-neutral-900 tracking-tight">{data.name}</h1>
-                <div className="flex items-center gap-2 mt-2">
-                    <span className={`px-2 py-0.5 rounded text-white text-xs font-bold uppercase tracking-wide shadow-sm ${barColor}`}>
-                        {data.house}
-                    </span>
-                    <span className="text-neutral-500 text-sm italic font-serif">— {data.type}</span>
+        {/* Header Section */}
+        <header className="border-b-2 border-neutral-900/10 pb-6 mb-8 relative z-10">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                    <h6 className="text-xs font-mono text-neutral-500 uppercase tracking-widest mb-2">Official Personnel Record</h6>
+                    <h1 className="text-5xl font-display font-bold text-neutral-900 tracking-tight leading-none">
+                        {data.name}
+                    </h1>
+                    <div className="flex items-center gap-3 mt-3">
+                        <span className={`font-bold font-serif text-lg uppercase tracking-wide flex items-center gap-2 ${houseColor}`}>
+                            {HouseCrest[data.house]} {data.house}
+                        </span>
+                        <span className="w-1 h-1 bg-neutral-400 rounded-full"></span>
+                        <span className="text-neutral-600 font-serif italic text-lg">{data.type} {data.subType && `(${data.subType})`}</span>
+                    </div>
+                </div>
+                
+                <div className="flex flex-col items-end">
+                    <span className="font-mono text-xs text-neutral-400">FILE NO.</span>
+                    <span className="font-mono text-lg text-neutral-600">{Math.random().toString(36).substring(2, 10).toUpperCase()}</span>
                 </div>
             </div>
-            <div className="text-5xl opacity-80 filter drop-shadow-sm transform -translate-y-2">
-                {HouseCrest[data.house]}
-            </div>
-        </div>
+        </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 relative z-10">
             
-            {/* Left Column: Stats & Equipment */}
-            <div className="space-y-6">
-                <section>
-                    <h4 className="font-display font-bold text-neutral-700 border-b border-neutral-300 mb-3 pb-1 flex items-center gap-2">
-                        <Fingerprint size={16} /> Magical Aptitude
-                    </h4>
-                    <div className="space-y-3 pr-2">
-                        <StatBar label="Magic" value={data.stats.magic} colorClass={barColor} />
-                        <StatBar label="Courage" value={data.stats.courage} colorClass={barColor} />
-                        <StatBar label="Intellect" value={data.stats.intelligence} colorClass={barColor} />
-                        <StatBar label="Cunning" value={data.stats.cunning} colorClass={barColor} />
-                        <StatBar label="Loyalty" value={data.stats.loyalty} colorClass={barColor} />
+            {/* LEFT COLUMN (Image & Visuals) */}
+            <div className="md:col-span-5 space-y-6">
+                
+                {/* Photo Attachment */}
+                <div className="relative transform rotate-1 hover:rotate-0 transition-transform duration-500">
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20 text-neutral-400">
+                        <Paperclip className="w-8 h-8 drop-shadow-sm" />
                     </div>
-                </section>
+                    <div className="bg-white p-3 pb-8 shadow-lg border border-neutral-200 rounded-sm">
+                        <div className="aspect-[4/5] w-full bg-neutral-100 overflow-hidden border border-neutral-300 relative grayscale-[0.1] sepia-[0.2]">
+                            {isLoadingImage ? (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center text-neutral-400 gap-2">
+                                    <div className="animate-spin w-6 h-6 border-2 border-neutral-400 border-t-transparent rounded-full"></div>
+                                    <span className="text-xs font-serif italic">Developing magical photograph...</span>
+                                </div>
+                            ) : imageUrl ? (
+                                <>
+                                <img src={imageUrl} alt={data.name} className="w-full h-full object-cover" />
+                                <div className="absolute inset-0 pointer-events-none mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/dust.png')] opacity-50"></div>
+                                </>
+                            ) : (
+                                <div className="absolute inset-0 bg-neutral-200 flex items-center justify-center text-neutral-400">
+                                    <span className="text-xs font-mono">NO IMG</span>
+                                </div>
+                            )}
+                        </div>
+                        <div className="mt-2 text-center font-hand text-xl text-neutral-600 opacity-80 rotate-1">
+                            {data.name}
+                        </div>
+                    </div>
+                </div>
 
-                <section>
-                    <h4 className="font-display font-bold text-neutral-700 border-b border-neutral-300 mb-3 pb-1 flex items-center gap-2">
-                        <Briefcase size={16} /> Equipment & Artifacts
+                {/* Basic Physical Stats */}
+                <div className="bg-white/40 border border-neutral-900/10 p-4 rounded-sm space-y-2">
+                     <div className="flex justify-between items-center border-b border-neutral-900/5 pb-2">
+                        <span className="text-xs font-bold uppercase text-neutral-500 tracking-wider">Defense Rating (HP)</span>
+                        <span className="font-mono font-bold text-lg text-neutral-800">{data.hp}</span>
+                     </div>
+                     <div className="flex justify-between items-center pt-1">
+                        <span className="text-xs font-bold uppercase text-neutral-500 tracking-wider">Class Rarity</span>
+                        <span className={`text-xs font-bold uppercase px-2 py-0.5 rounded border ${
+                            data.rarity === 'Mythic' ? 'bg-orange-100 text-orange-800 border-orange-200' : 
+                            'bg-neutral-100 text-neutral-600 border-neutral-200'
+                        }`}>
+                            {data.rarity}
+                        </span>
+                     </div>
+                </div>
+
+                 {/* Equipment */}
+                 <section>
+                    <h4 className={`font-display font-bold text-neutral-800 mb-3 flex items-center gap-2 text-sm uppercase tracking-wider`}>
+                        <Briefcase size={14} /> Equipment & Artifacts
                     </h4>
-                    <ul className="bg-white/40 border border-white/50 rounded p-3 space-y-2 text-sm font-serif shadow-sm">
+                    <ul className="bg-[#e6dec8] border border-[#d1c7b0] p-4 space-y-3 text-sm font-serif shadow-inner rounded-sm">
                         {data.wand && (
-                             <li className="flex items-start gap-2">
+                             <li className="flex items-start gap-2 pb-2 border-b border-neutral-900/5">
                                 <Wand2 className="w-4 h-4 text-neutral-600 mt-0.5 flex-shrink-0" />
-                                <span className="text-neutral-800"><span className="font-bold">Wand:</span> {data.wand}</span>
+                                <div>
+                                    <span className="font-bold text-neutral-800 text-xs uppercase block opacity-70">Wand</span>
+                                    <span className="text-neutral-900 italic">{data.wand}</span>
+                                </div>
                              </li>
                         )}
                         {data.equipment && data.equipment.length > 0 ? (
@@ -99,44 +156,78 @@ export const Profile: React.FC<ProfileProps> = ({ data }) => {
                                 </li>
                             ))
                         ) : (
-                            <li className="text-neutral-400 italic">No notable equipment listed.</li>
+                            <li className="text-neutral-400 italic text-xs">No notable equipment logged.</li>
                         )}
                     </ul>
                 </section>
+
             </div>
 
-            {/* Right Column: Bio & Traits */}
-            <div className="space-y-6">
+            {/* RIGHT COLUMN (Data & Lore) */}
+            <div className="md:col-span-7 space-y-8">
+                
+                {/* Biography */}
                 <section>
-                    <h4 className="font-display font-bold text-neutral-700 border-b border-neutral-300 mb-3 pb-1 flex items-center gap-2">
-                        <Stamp size={16} /> Biography
+                    <h4 className={`font-display font-bold text-neutral-800 border-b-2 ${houseBorder} mb-4 pb-1 flex items-center gap-2`}>
+                        <Stamp size={16} /> Biography & History
                     </h4>
-                    <p className="text-sm font-serif leading-relaxed text-neutral-800 text-justify">
+                    <p className="text-base font-serif leading-relaxed text-neutral-800 text-justify drop-shadow-sm">
                         {data.biography}
                     </p>
+                    
+                    {data.flavorText && (
+                         <div className="mt-4 pl-4 border-l-4 border-neutral-400 italic text-neutral-600 text-sm font-serif">
+                            "{data.flavorText}"
+                         </div>
+                    )}
                 </section>
 
-                {data.patronus && (
-                    <div className="bg-blue-50/60 border border-blue-200 p-3 rounded flex items-center gap-3 shadow-sm">
-                        <div className="p-2 bg-white rounded-full shadow-sm">
-                            <Shield className="text-blue-500 w-5 h-5" />
-                        </div>
-                        <div>
-                            <div className="text-[10px] text-blue-400 uppercase font-bold tracking-wider">Corporeal Patronus</div>
-                            <div className="text-sm font-bold text-neutral-700">{data.patronus}</div>
-                        </div>
+                {/* Stats */}
+                <section>
+                    <h4 className={`font-display font-bold text-neutral-800 border-b-2 ${houseBorder} mb-4 pb-1 flex items-center gap-2`}>
+                        <Fingerprint size={16} /> Magical Aptitude Test Results
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
+                        <StatBar label="Magical Power" value={data.stats.magic} colorClass="bg-neutral-800" />
+                        <StatBar label="Courage" value={data.stats.courage} colorClass="bg-red-800" />
+                        <StatBar label="Intelligence" value={data.stats.intelligence} colorClass="bg-blue-800" />
+                        <StatBar label="Cunning" value={data.stats.cunning} colorClass="bg-green-800" />
+                        <StatBar label="Loyalty" value={data.stats.loyalty} colorClass="bg-yellow-600" />
                     </div>
-                )}
+                </section>
 
-                <div className="grid grid-cols-2 gap-4">
+                {/* Spells & Abilities */}
+                <section>
+                    <h4 className={`font-display font-bold text-neutral-800 border-b-2 ${houseBorder} mb-4 pb-1 flex items-center gap-2`}>
+                        <Flame size={16} /> Known Spells & Abilities
+                    </h4>
+                    <div className="space-y-4">
+                        {data.abilities.map((ability, idx) => (
+                            <div key={idx} className="bg-white/30 border border-neutral-900/5 p-3 rounded hover:bg-white/50 transition-colors">
+                                <div className="flex justify-between items-start mb-1">
+                                    <h5 className="font-bold text-neutral-900 font-serif text-lg">{ability.name}</h5>
+                                    <span className="text-[10px] font-mono border border-neutral-300 rounded px-1.5 py-0.5 text-neutral-500 uppercase bg-neutral-50">
+                                        Cost: {ability.cost}
+                                    </span>
+                                </div>
+                                <p className="text-sm text-neutral-700 leading-snug font-serif">
+                                    {ability.description}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                {/* Traits */}
+                <div className="grid grid-cols-2 gap-6">
                     <section>
-                        <h4 className="font-display font-bold text-green-800 border-b border-green-800/20 mb-2 pb-1 text-sm flex items-center gap-2">
-                             Strengths
+                        <h4 className="font-display font-bold text-green-800 text-sm uppercase tracking-wider mb-2 border-b border-green-800/20 pb-1">
+                             Assessed Strengths
                         </h4>
                         <ul className="text-sm font-serif space-y-2 text-neutral-700">
                             {data.strengths?.map((s, i) => (
-                                <li key={i} className="flex items-start gap-1.5 leading-tight">
-                                    <span className="text-green-600 mt-1.5 w-1 h-1 rounded-full bg-green-600 flex-shrink-0"></span>
+                                <li key={i} className="flex items-start gap-2 leading-tight">
+                                    <Star className="w-3 h-3 text-green-600 mt-1 flex-shrink-0 fill-green-600" />
                                     {s}
                                 </li>
                             ))}
@@ -144,26 +235,27 @@ export const Profile: React.FC<ProfileProps> = ({ data }) => {
                     </section>
 
                     <section>
-                        <h4 className="font-display font-bold text-red-800 border-b border-red-800/20 mb-2 pb-1 text-sm flex items-center gap-2">
-                            <Skull size={14} /> Weaknesses
+                        <h4 className="font-display font-bold text-red-800 text-sm uppercase tracking-wider mb-2 border-b border-red-800/20 pb-1">
+                            Identified Weaknesses
                         </h4>
                         <ul className="text-sm font-serif space-y-2 text-neutral-700">
                             {data.weaknesses?.map((w, i) => (
-                                <li key={i} className="flex items-start gap-1.5 leading-tight">
-                                    <span className="text-red-600 mt-1.5 w-1 h-1 rounded-full bg-red-600 flex-shrink-0"></span>
+                                <li key={i} className="flex items-start gap-2 leading-tight">
+                                    <Skull className="w-3 h-3 text-red-600 mt-1 flex-shrink-0" />
                                     {w}
                                 </li>
                             ))}
                         </ul>
                     </section>
                 </div>
+
             </div>
         </div>
 
         {/* Footer Code */}
-        <div className="mt-8 pt-4 border-t border-neutral-800/10 flex justify-between text-[10px] font-mono text-neutral-400">
-            <span>FILE: {Math.random().toString(36).substring(7).toUpperCase()}</span>
-            <span>MINISTRY OF MAGIC • DEPT OF MYSTERIES</span>
+        <div className="mt-12 pt-4 border-t border-neutral-800/10 flex flex-col md:flex-row justify-between text-[10px] font-mono text-neutral-400 uppercase tracking-wider">
+            <span>Generated by The Department of Mysteries</span>
+            <span>Magic is Might // Laws of Magic Section 7B</span>
         </div>
       </div>
     </div>
