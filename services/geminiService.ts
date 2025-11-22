@@ -29,12 +29,13 @@ const characterSchema = {
         properties: {
           name: { type: Type.STRING },
           cost: { type: Type.STRING, description: "Mana cost string. Use numbers for generic cost and letters for specific sources: 'R' (Gryffindor/Red), 'S' (Slytherin/Green), 'B' (Ravenclaw/Blue), 'H' (Hufflepuff/Yellow), 'D' (Dark Arts/Black), 'W' (Light/White). Example: '2RR' or '1SD'." },
-          description: { type: Type.STRING },
+          description: { type: Type.STRING, description: "Very short description (max 20 words)." },
         },
         required: ['name', 'cost', 'description']
-      }
+      },
+      description: "Generate exactly 2 or 3 abilities. No more than 3."
     },
-    flavorText: { type: Type.STRING },
+    flavorText: { type: Type.STRING, description: "Short poetic flavor text, max 1 sentence." },
     stats: {
       type: Type.OBJECT,
       properties: {
@@ -84,7 +85,8 @@ export const generateCharacterData = async (prompt: string): Promise<CardData> =
       3. Ensure ability costs use TCG style notation (R/S/B/H/D/W).
       4. The output must be valid JSON matching the schema.
       5. Make the biography sound like an official Ministry of Magic record.
-      6. For 'visualDescription', you MUST include detailed environment, lighting, and pose instructions to ensure a masterpiece image.`,
+      6. For 'visualDescription', you MUST include detailed environment, lighting, and pose instructions to ensure a masterpiece image.
+      7. IMPORTANT: Generate MAXIMUM 3 abilities. Keep ability descriptions VERY concise (under 20 words) to fit on the card.`,
       config: {
         responseMimeType: "application/json",
         responseSchema: characterSchema,
