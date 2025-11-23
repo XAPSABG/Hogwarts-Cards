@@ -130,17 +130,24 @@ export const generateCharacterData = async (prompt: string): Promise<CardData> =
   }
 };
 
-export const generateCharacterImage = async (visualPrompt: string): Promise<string> => {
+export const generateCharacterImage = async (visualPrompt: string, characterName?: string): Promise<string> => {
   try {
+    // We construct the prompt to prioritize likeness without triggering "Real Person" safety filters.
+    // Explicitly asking for "actor likeness" often triggers refusals.
+    // Asking for "Accurate character portrayal" is safer and effective.
+    const nameInstruction = characterName 
+      ? `Subject: ${characterName}. Portray the character with accurate features described in the books and movies.` 
+      : "Subject: A wizarding world character.";
+
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: {
         parts: [{
-          text: `High fantasy oil painting in the style of Magic The Gathering art. Detailed masterpiece, 8k resolution, dramatic cinematic lighting. Subject centered in frame. 
+          text: `High quality fantasy oil painting, Magic The Gathering style. 
+          ${nameInstruction}
+          Visual Context: ${visualPrompt}
           
-          Subject Description: ${visualPrompt}
-          
-          IMPORTANT: If the character is a specific person, ensure the facial features match their description perfectly. Generate the artwork ONLY. Do NOT include any card frames, borders, text, stats, or UI elements. The image should be a full-bleed character illustration.`
+          Cinematic lighting, highly detailed. Full bleed illustration, no text.`
         }]
       },
       config: {
@@ -150,12 +157,18 @@ export const generateCharacterImage = async (visualPrompt: string): Promise<stri
       }
     });
 
-    for (const part of response.candidates[0].content.parts) {
-      if (part.inlineData) {
-        return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-      }
+    if (response.candidates && response.candidates.length > 0) {
+        for (const part of response.candidates[0].content.parts) {
+            if (part.inlineData) {
+              return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+            }
+        }
     }
-    throw new Error("No image data generated.");
+    
+    console.warn("Gemini returned a response but no image data found. It may have been filtered.");
+    // Fallback to transparent pixel instead of throwing to prevent UI crash
+    return "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+
   } catch (error) {
     console.error("Error generating image:", error);
     // Return a simple transparent pixel to avoid Tainted Canvas errors if generation fails

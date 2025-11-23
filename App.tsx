@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { CardData } from './types';
 import { generateCharacterData, generateCharacterImage } from './services/geminiService';
@@ -31,13 +32,13 @@ const App: React.FC = () => {
       setIsLoadingData(false);
 
       // 2. Generate Image based on the AI's visual description of the character
-      // We pass the visualDescription from the data response
+      // We pass the character name explicitly to help the AI match the likeness of canon characters
       if (data.visualDescription) {
-        const imageBase64 = await generateCharacterImage(data.visualDescription);
+        const imageBase64 = await generateCharacterImage(data.visualDescription, data.name);
         setImageUrl(imageBase64);
       } else {
         // Fallback if no visual description
-        const imageBase64 = await generateCharacterImage(`Portrait of ${data.name}, Harry Potter style art`);
+        const imageBase64 = await generateCharacterImage(`Portrait of ${data.name}, Harry Potter style art`, data.name);
         setImageUrl(imageBase64);
       }
     } catch (err) {
