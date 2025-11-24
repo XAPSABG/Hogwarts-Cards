@@ -1,8 +1,10 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { CardData, House } from '../types';
+import { CardData, House, UserTier } from '../types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// NOTE: We do NOT instantiate the client globally here anymore.
+// We must instantiate it inside the functions to ensure we pick up the latest 
+// process.env.API_KEY after the user selects it in the UI.
 
 // Schema for Character Data
 const characterSchema = {
@@ -98,10 +100,16 @@ const characterSchema = {
   required: ['name', 'house', 'type', 'hp', 'rarity', 'abilities', 'signatureSpell', 'flavorText', 'stats', 'visualDescription', 'biography', 'strengths', 'weaknesses', 'equipment', 'wand', 'patronus', 'boggart', 'bloodStatus', 'bestSubject', 'titles', 'familiar', 'mirrorOfErised', 'amortentia', 'dangerLevel', 'affiliations']
 };
 
-export const generateCharacterData = async (prompt: string): Promise<CardData> => {
+export const generateCharacterData = async (prompt: string, tier: UserTier = 'free'): Promise<CardData> => {
   try {
+    // Instantiate with latest key
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    
+    // Select model based on tier. Paid tier gets the more advanced reasoning model.
+    const modelName = tier === 'paid' ? 'gemini-3-pro-preview' : 'gemini-2.5-flash';
+
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: modelName,
       contents: `Create a detailed Ministry of Magic Personnel File for a Harry Potter universe character based on: "${prompt}". 
       
       Rules:
@@ -130,17 +138,22 @@ export const generateCharacterData = async (prompt: string): Promise<CardData> =
   }
 };
 
-export const generateCharacterImage = async (visualPrompt: string, characterName?: string): Promise<string> => {
+export const generateCharacterImage = async (visualPrompt: string, characterName: string | undefined, tier: UserTier = 'free'): Promise<string> => {
   try {
-    // We construct the prompt to prioritize likeness without triggering "Real Person" safety filters.
-    // Explicitly asking for "actor likeness" often triggers refusals.
-    // Asking for "Accurate character portrayal" is safer and effective.
+    // Instantiate with latest key
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+    // Select model based on tier
+    // Paid: 'gemini-3-pro-image-preview' (Nano Banana Pro)
+    // Free: 'gemini-2.5-flash-image' (Nano Banana)
+    const modelName = tier === 'paid' ? 'gemini-3-pro-image-preview' : 'gemini-2.5-flash-image';
+
     const nameInstruction = characterName 
       ? `Subject: ${characterName}. Portray the character with accurate features described in the books and movies.` 
       : "Subject: A wizarding world character.";
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
+      model: modelName,
       contents: {
         parts: [{
           text: `High quality fantasy oil painting, Magic The Gathering style. 
@@ -152,7 +165,7 @@ export const generateCharacterImage = async (visualPrompt: string, characterName
       },
       config: {
         imageConfig: {
-          aspectRatio: "4:3" // Landscape ratio to fit card art box
+          aspectRatio: "4:3"
         }
       }
     });
@@ -166,12 +179,10 @@ export const generateCharacterImage = async (visualPrompt: string, characterName
     }
     
     console.warn("Gemini returned a response but no image data found. It may have been filtered.");
-    // Fallback to transparent pixel instead of throwing to prevent UI crash
     return "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
   } catch (error) {
     console.error("Error generating image:", error);
-    // Return a simple transparent pixel to avoid Tainted Canvas errors if generation fails
     return "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
   }
 };

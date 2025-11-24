@@ -7,6 +7,8 @@ export enum House {
   Neutral = 'Neutral'
 }
 
+export type UserTier = 'free' | 'paid';
+
 export interface Ability {
   name: string;
   cost: string;
