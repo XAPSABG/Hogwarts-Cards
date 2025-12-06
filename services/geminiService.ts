@@ -138,7 +138,13 @@ export const generateCharacterData = async (prompt: string, tier: UserTier = 'fr
   }
 };
 
-export const generateCharacterImage = async (visualPrompt: string, characterName: string | undefined, tier: UserTier = 'free'): Promise<string> => {
+export const generateCharacterImage = async (
+  visualPrompt: string, 
+  characterName: string | undefined, 
+  tier: UserTier = 'free',
+  aspectRatio: string = '4:3',
+  style: string = 'Fantasy Oil Painting'
+): Promise<string> => {
   try {
     // Instantiate with latest key
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -156,7 +162,7 @@ export const generateCharacterImage = async (visualPrompt: string, characterName
       model: modelName,
       contents: {
         parts: [{
-          text: `High quality fantasy oil painting, Magic The Gathering style. 
+          text: `High quality ${style}, Magic The Gathering style. 
           ${nameInstruction}
           Visual Context: ${visualPrompt}
           
@@ -165,7 +171,7 @@ export const generateCharacterImage = async (visualPrompt: string, characterName
       },
       config: {
         imageConfig: {
-          aspectRatio: "4:3"
+          aspectRatio: aspectRatio
         }
       }
     });

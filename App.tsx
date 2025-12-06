@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { CardData, UserTier } from './types';
+import { CardData, UserTier, AspectRatio, ImageStyle } from './types';
 import { generateCharacterData, generateCharacterImage } from './services/geminiService';
 import { InputForm } from './components/InputForm';
 import { Profile } from './components/Profile';
@@ -35,7 +35,7 @@ const App: React.FC = () => {
     }
   };
 
-  const handleGenerate = async (prompt: string) => {
+  const handleGenerate = async (prompt: string, aspectRatio: AspectRatio, style: ImageStyle) => {
     if (!userTier) return;
 
     setIsLoadingData(true);
@@ -50,12 +50,12 @@ const App: React.FC = () => {
       setCardData(data);
       setIsLoadingData(false);
 
-      // 2. Generate Image with tier-specific model
+      // 2. Generate Image with tier-specific model, ratio, and style
       if (data.visualDescription) {
-        const imageBase64 = await generateCharacterImage(data.visualDescription, data.name, userTier);
+        const imageBase64 = await generateCharacterImage(data.visualDescription, data.name, userTier, aspectRatio, style);
         setImageUrl(imageBase64);
       } else {
-        const imageBase64 = await generateCharacterImage(`Portrait of ${data.name}, Harry Potter style art`, data.name, userTier);
+        const imageBase64 = await generateCharacterImage(`Portrait of ${data.name}, Harry Potter style art`, data.name, userTier, aspectRatio, style);
         setImageUrl(imageBase64);
       }
     } catch (err: any) {

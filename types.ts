@@ -74,3 +74,17 @@ export interface AppState {
   isLoadingImage: boolean;
   error: string | null;
 }
+
+export type AspectRatio = "1:1" | "3:4" | "4:3" | "16:9" | "9:16";
+
+export const IMAGE_STYLES = [
+  "Fantasy Oil Painting",
+  "Cinematic Photorealistic",
+  "Vintage Book Illustration",
+  "Watercolor Art",
+  "Dark Fantasy",
+  "Anime Style",
+  "3D Render"
+] as const;
+
+export type ImageStyle = typeof IMAGE_STYLES[number];
